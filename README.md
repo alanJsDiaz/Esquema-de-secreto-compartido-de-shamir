@@ -1,1 +1,0 @@
-# Esquema-de-secreto-compartido-de-shamir
