@@ -44,7 +44,7 @@ El programa permite dos comandos principales:
 2. **Descifrar**  
    Utiliza la bandera `-d` junto con el archivo con contraseñas y el archivo_cifrado.
 
-   java -jar target/esteganografia.jar -d <archivo_con_contraseñas> <archivo_cifrado>
+   java -jar target/criptografia.jar -d <archivo_con_contraseñas> <archivo_cifrado>
 
 
 ### Ejemplos
