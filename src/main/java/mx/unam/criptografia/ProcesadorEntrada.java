@@ -78,9 +78,12 @@ public class ProcesadorEntrada {
             throw new IllegalArgumentException("No se pudo leer la contraseña.");
         }
         byte[] contraseñaProcesada = ProcesadorContraseña.getSHA256(contraseña);
+        int numeroTotalEvaluaciones = Integer.parseInt(args[2]);
+        int minimoEvaluaciones = Integer.parseInt(args[3]);
         SecretoShamir.archivoConContraseñas(args[1], args[2], args[3], contraseñaProcesada);
-        return new ComandoCifrar(args[1], args[4], contraseñaProcesada);
+        return new ComandoCifrar(args[1], args[4], contraseñaProcesada, numeroTotalEvaluaciones, minimoEvaluaciones);
     }
+    
 
     /**
      * Verifica si los parámetros para cifrar son válidos.
@@ -92,7 +95,7 @@ public class ProcesadorEntrada {
             throw new IllegalArgumentException("Parámetros insuficientes o demasiados para la bandera -c.");
         }
         archivoValidoContrasenas(args[1]);
-        numeroDeContraseñasValido(args[2]);
+        numeroDeEvaluaciones(args[2]);
         numeroMinimoDePuntosValido(args[3], Integer.parseInt(args[2]));
         archivoValidoDocumentoClaro(args[4]);
     }
@@ -108,18 +111,18 @@ public class ProcesadorEntrada {
     }
 
     /**
-     * Verifica si el número total de contraseñas es válido.
-     * @param numeroDeContrasenas Número total de contraseñas.
+     * Verifica si el número total de evaluaciones es válido.
+     * @param numeroDeEvaluaciones Número total de evaluaciones.
      */
-    private void numeroDeContraseñasValido(String numeroDeContrasenas) {
-        if (!numeroDeContrasenas.matches("[0-9.]+")) {
-            throw new IllegalArgumentException("El número total de contraseñas debe ser un número.");
+    private void numeroDeEvaluaciones(String numeroDeEvaluaciones) {
+        if (!numeroDeEvaluaciones.matches("[0-9.]+")) {
+            throw new IllegalArgumentException("El número total de evaluaciones debe ser un número.");
         }
-        if (!esEntero(numeroDeContrasenas)) {
-            throw new IllegalArgumentException("El número total de contraseñas debe ser un número entero.");
+        if (!esEntero(numeroDeEvaluaciones)) {
+            throw new IllegalArgumentException("El número total de evaluaciones debe ser un número entero.");
         }
-        if (Integer.parseInt(numeroDeContrasenas) < 2) {
-            throw new IllegalArgumentException("El número total de contraseñas debe ser mayor a 2.");
+        if (Integer.parseInt(numeroDeEvaluaciones) < 2) {
+            throw new IllegalArgumentException("El número total de evaluaciones debe ser mayor a 2.");
         }
     }
 
@@ -128,13 +131,13 @@ public class ProcesadorEntrada {
      * @param numeroMinimoDePuntos Número mínimo de puntos necesarios para descifrar.
      * @param numeroDeContrasenas Número total de contraseñas.
      */
-    private void numeroMinimoDePuntosValido(String numeroMinimoDePuntos, int numeroDeContrasenas) {
+    private void numeroMinimoDePuntosValido(String numeroMinimoDePuntos, int numeroDeEvaluaciones) {
         if (!numeroMinimoDePuntos.matches("[0-9.]+")) {
-            throw new IllegalArgumentException("El número mínimo de puntos debe ser un número entero.");
+            throw new IllegalArgumentException("El número mínimo de puntos debe ser un número.");
         } else if (!esEntero(numeroMinimoDePuntos)) {
             throw new IllegalArgumentException("El número mínimo de puntos debe ser un número entero .");
-        } else if (Integer.parseInt(numeroMinimoDePuntos) <= 1 || Integer.parseInt(numeroMinimoDePuntos) > numeroDeContrasenas) {
-            throw new IllegalArgumentException("El número mínimo de puntos debe ser mayor a 1 y menor igual que el numero de contraseñas.");
+        } else if (Integer.parseInt(numeroMinimoDePuntos) <= 1 || Integer.parseInt(numeroMinimoDePuntos) > numeroDeEvaluaciones) {
+            throw new IllegalArgumentException("El número mínimo de evaluaciones debe ser mayor a 1 y menor igual que el numero de contraseñas. Verifica tus datos.");
         }
     }
 

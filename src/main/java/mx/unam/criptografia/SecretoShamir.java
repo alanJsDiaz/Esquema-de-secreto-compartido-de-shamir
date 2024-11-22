@@ -26,7 +26,9 @@ public class SecretoShamir {
      */
     public static void archivoConContraseñas(String archivoConContraseñas, String n, String t, byte[] secreto) {
         try {
-            archivoConContraseñas = agregaExtension(archivoConContraseñas, n, t);
+            archivoConContraseñas = archivoConContraseñas.endsWith(".frg") 
+                                    ? archivoConContraseñas 
+                                    : archivoConContraseñas + ".frg";
             List<BigInteger> coeficientes = generaPolinomio(Integer.parseInt(t), secreto);
             List<BigInteger[]> puntos = generaPuntos(Integer.parseInt(n), coeficientes);
             String contenido = generarContenidoArchivo(puntos, n, t);
@@ -35,16 +37,9 @@ public class SecretoShamir {
             manejarErrorEscrituraArchivo(e);
         }
     }
+    
 
-    /**
-     * Agrega el valor de t al nombre del archivo.
-     * @param archivoConContraseñas Nombre del archivo.
-     * @param t Valor de t.
-     * @return Nombre del archivo con el valor de t.
-     */
-    private static String agregaExtension(String archivoConContraseñas, String n, String t) {
-        return archivoConContraseñas + "-" + n + "-" + t + ".frg";
-    }
+
 
     /**
      * Método que genera un polinomio de grado t-1 y el secreto como término independiente.
@@ -140,10 +135,9 @@ public class SecretoShamir {
      */
     public static byte[] recuperaSecreto(String archivoConContraseñas) {
         List<BigInteger[]> puntos = obtenerPuntos(archivoConContraseñas);
-        if(puntos.size() < obtenerTDesdeNombre(archivoConContraseñas)) {
+        int t = obtenerTDesdeArchivo(archivoConContraseñas); // Cambiar esta línea
+        if (puntos.size() < t) {
             throw new IllegalArgumentException("El número de puntos no coincide con el número necesario de contraseñas.");
-        } else if (puntos.size() > obtenerNDesdeNombre(archivoConContraseñas)) {
-            throw new IllegalArgumentException("El número de puntos es mayor al número total de contraseñas.");
         }
         BigInteger secreto = BigInteger.ZERO;
         for (int i = 0; i < puntos.size(); i++) {
@@ -153,6 +147,7 @@ public class SecretoShamir {
         }
         return ByteNormalizado(secreto.toByteArray());
     }
+    
 
     /**
      * Recupera lospuntos a partir de un archivo con contraseñas.
@@ -164,34 +159,45 @@ public class SecretoShamir {
         List<BigInteger[]> puntos = new ArrayList<>();
         try {
             List<String> lineas = Files.readAllLines(archivo.toPath());
-                for (int i = 0; i < lineas.size() - 2; i++) {
-                String linea = lineas.get(i);
-                String[] punto = linea.replace("(", "").replace(")", "").split(", ");
-                BigInteger x = new BigInteger(punto[0]);
-                BigInteger y = new BigInteger(punto[1]);
-                puntos.add(new BigInteger[]{x, y});
+            for (String linea : lineas) {
+                linea = linea.trim(); // Eliminar espacios en blanco
+                if (linea.matches("\\(\\d+, \\d+\\)")) { // Validar formato "(x, y)"
+                    String[] punto = linea.replace("(", "").replace(")", "").split(", ");
+                    BigInteger x = new BigInteger(punto[0]);
+                    BigInteger y = new BigInteger(punto[1]);
+                    puntos.add(new BigInteger[]{x, y});
+                }
             }
             return puntos;
         } catch (IOException e) {
-            System.err.println("Error al leer el archivo con contraseñas.");
+            System.err.println("Error al leer el archivo con evaluaciones.");
             e.printStackTrace();
             return null;
         }
     }
+    
+    
+    
+    
 
-    public static int obtenerTDesdeNombre(String archivoConContraseñas) {
-        String nombreSinExtension = archivoConContraseñas.replaceAll("\\.frg$", "");
-        int indiceGuion = nombreSinExtension.lastIndexOf("-");
-        if (indiceGuion == -1) {
-            throw new IllegalArgumentException("El nombre del archivo no contiene el numero necesario de evaluaciones necesarias.");
-        }
-        String tString = nombreSinExtension.substring(indiceGuion + 1);
+    public static int obtenerTDesdeArchivo(String archivoConContraseñas) {
+        File archivo = new File(archivoConContraseñas);
         try {
-            return Integer.parseInt(tString);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("El valor de t en el nombre del archivo no es válido.", e);
+            List<String> lineas = Files.readAllLines(archivo.toPath());
+            // Buscar la línea que contiene el número mínimo de evaluaciones
+            for (String linea : lineas) {
+                if (linea.startsWith("Numero necesario de contraseñas para descifrar el archivo:")) {
+                    // Extraer el valor de t desde la línea
+                    String tString = linea.split(":")[1].trim();
+                    return Integer.parseInt(tString);
+                }
+            }
+            throw new IllegalArgumentException("No se encontró el valor de t en el archivo.");
+        } catch (IOException e) {
+            throw new RuntimeException("Error al leer el archivo de contraseñas.", e);
         }
     }
+    
 
     public static int obtenerNDesdeNombre(String archivoConContraseñas) {
         String nombreSinExtension = archivoConContraseñas.replaceAll("\\.frg$", "");
