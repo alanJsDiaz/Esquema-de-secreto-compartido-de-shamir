@@ -5,11 +5,9 @@ package mx.unam.criptografia;
 
 import static org.junit.Assert.*;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import java.io.IOException;
 
 import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.util.List;
 
 
@@ -54,7 +52,7 @@ public class SecretoShamirTest extends Calificador {
             new BigInteger("3")
         );
         BigInteger x = new BigInteger("2");
-        BigInteger resultado = SecretoShamir.evaluaPolinomio(coeficientes, x);
+        BigInteger resultado = SecretoShamir.evaluaPolinomioHorner(coeficientes, x);
         assertEquals(new BigInteger("17"), resultado);
         agregaPuntos(1);
         aprobada();
@@ -93,9 +91,4 @@ public class SecretoShamirTest extends Calificador {
         agregaPuntos(1);
         aprobada();
     }
-
-
-
-
-
 }
