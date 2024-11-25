@@ -7,7 +7,9 @@ import java.nio.file.Files;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -37,9 +39,6 @@ public class SecretoShamir {
             manejarErrorEscrituraArchivo(e);
         }
     }
-    
-
-
 
     /**
      * Método que genera un polinomio de grado t-1 y el secreto como término independiente.
@@ -65,27 +64,30 @@ public class SecretoShamir {
      * @return una lista de n puntos (x, y).
      */
     public static List<BigInteger[]> generaPuntos(int n, List<BigInteger> coeficientes) {
+        Set<BigInteger> valoresX = new HashSet<>();
         List<BigInteger[]> puntos = new ArrayList<>();
-        for (int i = 1; i <= n; i++) {
-            BigInteger x = BigInteger.valueOf(i);
-            BigInteger y = evaluaPolinomio(coeficientes, x);
-            puntos.add(new BigInteger[]{x, y});
+        SecureRandom random = new SecureRandom();
+        while (puntos.size() < n) {
+            BigInteger x = new BigInteger(100, random); 
+            if (!valoresX.contains(x)) { 
+                valoresX.add(x);
+                BigInteger y = evaluaPolinomioHorner(coeficientes, x);
+                puntos.add(new BigInteger[]{x, y});
+            }
         }
         return puntos;
     }
 
     /**
-     * Método que evalúa un polinomio en un punto x.
+     * Método que evalúa un polinomio en un punto x utilizando el algoritmo de Horner.
      * @param coeficientes los coeficientes del polinomio.
      * @param x el punto en el que se evalúa el polinomio.
      * @return el valor del polinomio en el punto x.
      */
-    public static BigInteger evaluaPolinomio(List<BigInteger> coeficientes, BigInteger x) {
+    public static BigInteger evaluaPolinomioHorner(List<BigInteger> coeficientes, BigInteger x) {
         BigInteger resultado = BigInteger.ZERO;
-        BigInteger potencia = BigInteger.ONE;
-        for (BigInteger coef : coeficientes) {
-            resultado = resultado.add(coef.multiply(potencia));
-            potencia = potencia.multiply(x);     
+        for (int i = coeficientes.size() - 1; i >= 0; i--) {
+            resultado = resultado.multiply(x).add(coeficientes.get(i));
         }
         return resultado;
     }
@@ -147,7 +149,6 @@ public class SecretoShamir {
         }
         return ByteNormalizado(secreto.toByteArray());
     }
-    
 
     /**
      * Recupera lospuntos a partir de un archivo con contraseñas.
@@ -175,10 +176,6 @@ public class SecretoShamir {
             return null;
         }
     }
-    
-    
-    
-    
 
     public static int obtenerTDesdeArchivo(String archivoConContraseñas) {
         File archivo = new File(archivoConContraseñas);
