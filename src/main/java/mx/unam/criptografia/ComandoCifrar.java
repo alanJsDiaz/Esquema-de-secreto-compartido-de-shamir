@@ -32,7 +32,6 @@ public class ComandoCifrar implements Comando {
     @Override
     public void ejecutar() {
         System.out.println("Cifrando...");
-        // Llamar al método cifrar de AES con los nuevos parámetros
         AES.cifrar(archivoConContraseñas, archivoDocumentoClaro, contraseña, numeroTotalEvaluaciones, minimoEvaluaciones);
         System.out.println("Texto cifrado y guardado en : " + archivoConContraseñas + ".aes\n" +
                 "Fragmentos guardados en : " + archivoConContraseñas + ".frg");
