@@ -136,19 +136,28 @@ public class SecretoShamir {
      * @return el secreto recuperado.
      */
     public static byte[] recuperaSecreto(String archivoConContraseñas) {
-        List<BigInteger[]> puntos = obtenerPuntos(archivoConContraseñas);
-        int t = obtenerTDesdeArchivo(archivoConContraseñas); // Cambiar esta línea
-        if (puntos.size() < t) {
-            throw new IllegalArgumentException("El número de puntos no coincide con el número necesario de contraseñas.");
-        }
-        BigInteger secreto = BigInteger.ZERO;
-        for (int i = 0; i < puntos.size(); i++) {
-            BigInteger yi = puntos.get(i)[1];
-            BigInteger li = calcularTérminoLagrange(i, puntos);
-            secreto = secreto.add(yi.multiply(li).mod(modulo)).mod(modulo);
-        }
-        return ByteNormalizado(secreto.toByteArray());
+    // Obtener los puntos (x, y) del archivo
+    List<BigInteger[]> puntos = obtenerPuntos(archivoConContraseñas);
+    
+    // Verificar que haya suficientes puntos
+    if (puntos.size() < 1) {
+        throw new IllegalArgumentException("El archivo no contiene puntos suficientes para recuperar el secreto.");
     }
+    
+    // Inicializamos el secreto como 0
+    BigInteger secreto = BigInteger.ZERO;
+    
+    // Iteramos sobre los puntos (x, y) para aplicar la fórmula de Lagrange y recuperar el secreto
+    for (int i = 0; i < puntos.size(); i++) {
+        BigInteger yi = puntos.get(i)[1];  // Valor de y en el punto (x, y)
+        BigInteger li = calcularTérminoLagrange(i, puntos);  // Término de Lagrange Li(0)
+        secreto = secreto.add(yi.multiply(li).mod(modulo)).mod(modulo);  // Acumulamos el valor del secreto
+    }
+    
+    // Normalizamos el byte array resultante
+    return ByteNormalizado(secreto.toByteArray());
+}
+
 
     /**
      * Recupera lospuntos a partir de un archivo con contraseñas.
@@ -177,24 +186,6 @@ public class SecretoShamir {
         }
     }
 
-    public static int obtenerTDesdeArchivo(String archivoConContraseñas) {
-        File archivo = new File(archivoConContraseñas);
-        try {
-            List<String> lineas = Files.readAllLines(archivo.toPath());
-            // Buscar la línea que contiene el número mínimo de evaluaciones
-            for (String linea : lineas) {
-                if (linea.startsWith("Numero necesario de contraseñas para descifrar el archivo:")) {
-                    // Extraer el valor de t desde la línea
-                    String tString = linea.split(":")[1].trim();
-                    return Integer.parseInt(tString);
-                }
-            }
-            throw new IllegalArgumentException("No se encontró el valor de t en el archivo.");
-        } catch (IOException e) {
-            throw new RuntimeException("Error al leer el archivo de contraseñas.", e);
-        }
-    }
-    
 
     public static int obtenerNDesdeNombre(String archivoConContraseñas) {
         String nombreSinExtension = archivoConContraseñas.replaceAll("\\.frg$", "");
