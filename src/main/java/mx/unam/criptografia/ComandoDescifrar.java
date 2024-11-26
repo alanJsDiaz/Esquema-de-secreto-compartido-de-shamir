@@ -24,6 +24,6 @@ public class ComandoDescifrar implements Comando {
     public void ejecutar() {
         System.out.println("Descifrando...");
         AES.descifrar(archivoConContraseñasNecesarias, archivoCifrado);
-        System.out.println("Archivo Descifrado" + archivoCifrado + ".txt");
+        System.out.println("Archivo Descifrado : " + archivoCifrado );
     }
 }
