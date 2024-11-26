@@ -41,6 +41,8 @@ El programa permite dos comandos principales:
 
 2. **Descifrar**  
    Utiliza la bandera `-d` junto con el archivo con contraseñas y el archivo_cifrado.
+
+   
    El programa busca en el archivo cifrado el numero minimo de fragmentos que se necesitan para poder decifrar, no hace falta que esta informacion se proporcione en el archivo con las contraseñas (fragmentos).
    El archivo con las contraseñas solo debe tener los fragmentos, es decir, los puntos con las respectivas evaluaciones, no hace falta nada mas.
 
